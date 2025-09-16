@@ -20,3 +20,6 @@ build/
 # IDE / Editor files
 .vscode/
 .idea/
+
+# Uploaded files (resumes)
+uploads/
