@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Internships</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .card:hover{
+            transform: translateY(-4px);
+            transition: 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!--headingg-->
+    <h3 class="text-3xl text-center text-blue-600 hover:underline font-medium py-6">Explore Internships</h3>
+
+    <!--Search and filter section-->
+    <div class="flex flex-col md:flex-row gap-4 justify-center items-center px-4 md:px-12 mb-8">
+         <input id="searchInput" type="text" placeholder="Search internships...." class=" px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-300">
+    
+        <!--<select id="domainFilter" class="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-300">
+            <option value="all">All Domains</option>
+            <option value="webdev">Web Development</option>
+            <option value="ai">AI / ML</option>
+            <option value="marketing">Marketing</option>
+            <option value="uiux">UI / UX Design</option>
+            <option value="data">Data Analyst</option>
+        </select> -->
+    </div>
+   
+     <!-- Results count -->
+    <p id="resultsCount" class="text-sm text-gray-600 mb-4"></p>
+
+    <!-- Cards container -->
+    <div id="cardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-6 md:px-12 pb-10"></div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm text-center">
+            <h3 class="text-green-600 text-xl font-bold mb-4">Application Submitted!</h3>
+            <p class="mb-6">Your application has been successfully submitted.</p>
+            <button onclick="closeSuccessModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Close</button>
+        </div>
+    </div>
+
+    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cardContainer = document.getElementById('cardContainer');
+    const searchInput = document.getElementById('searchInput');
+    const resultsCount = document.getElementById('resultsCount');
+
+    let internships = [];
+
+    // Fetch internships from backend
+    async function loadInternships() {
+        cardContainer.innerHTML = 'Loading...';
+        const token = localStorage.getItem('userToken'); // optional if auth required
+        try {
+            const res = await fetch('http://localhost:5000/api/internships', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                cardContainer.innerHTML = `Error: ${data.message}`;
+                return;
+            }
+            internships = data.internships;
+            renderCards();
+        } catch (err) {
+            console.error(err);
+            cardContainer.innerHTML = 'Error loading internships.';
+        }
+    }
+
+    // Render internship cards
+    function renderCards() {
+        cardContainer.innerHTML = '';
+        let shownCount = 0;
+        const keyword = searchInput.value.toLowerCase();
+
+        internships.forEach(internship => {
+            if (!internship.title.toLowerCase().includes(keyword)) return;
+
+            const card = document.createElement('div');
+            card.className = 'card bg-white border rounded-xl p-5 shadow hover:shadow-md transition';
+            card.dataset.id = internship._id;
+            card.innerHTML = `
+                <div class="flex items-center gap-3 mb-3">
+                    <h3 class="text-lg font-bold text-blue-700 mb-2">${internship.title}</h3>
+                </div>
+                <p class="text-sm">Company: <strong>${internship.company.name || internship.company}</strong></p>
+                <p class="text-sm">Location: ${internship.location || 'N/A'}</p>
+                <p class="text-sm">Stipend: ${internship.stipend || 'N/A'}</p>
+                <p class="text-sm mt-2">Description: ${internship.description || 'No description provided.'}</p>
+                <button class="apply-button mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply now</button>
+            `;
+            cardContainer.appendChild(card);
+            shownCount++;
+        });
+
+        resultsCount.textContent = `${shownCount} internships found.`;
+        attachApplyButtons();
+    }
+
+    // Filter listeners
+    searchInput.addEventListener('input', renderCards);
+
+    // Apply button functionality
+    function attachApplyButtons() {
+        const applyButtons = document.querySelectorAll('.apply-button');
+        applyButtons.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const card = btn.closest('.card');
+                const internshipId = card.dataset.id;
+                const token = localStorage.getItem('userToken');
+
+                try {
+                    const res = await fetch(`http://localhost:5000/api/internships/${internshipId}/apply`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        document.getElementById('successModal').classList.remove('hidden');
+                        btn.disabled = true;
+                    } else {
+                        alert(data.message || 'Error applying.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error applying.');
+                }
+            });
+        });
+    }
+
+    // Initial load
+    loadInternships();
+});
+
+// Close modal
+function closeSuccessModal() {
+    const modal = document.getElementById('successModal');
+    modal.classList.add('hidden');
+}
+</script>
+
+</body>
+</html>

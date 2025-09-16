@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<style>
+    #appModal {
+        transition: opacity 0.3s ease;
+    }
+    .hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+</style>
+
+<body class="bg-gray-100 font-sans">
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar -->
+        <aside class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 md:static md:inset-auto md:shadow-none" id="sidebar">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-blue-600">CampusIntern</h1>
+                <button class="lg:hidden" id="closeSidebar"><i data-feather="x"></i></button>
+            </div>
+            <nav class="mt-6">
+                <ul class="space-y-2">
+                    <button onclick="showSection('dashboard')" class="w-full text-left py-2 px-4 hover:bg-blue-100 rounded transition">🏠 Dashboard</button>
+                    <button onclick="showSection('my-internships')" class="w-full text-left py-2 px-4 hover:bg-blue-100 rounded transition">📋 My Internships</button>
+                    <button onclick="showSection('post-internship')" class="w-full text-left py-2 px-4 hover:bg-blue-100 rounded transition">➕ Post Internship</button>
+                    <button onclick="showSection('applications')" class="w-full text-left py-2 px-4 hover:bg-blue-100 rounded transition">📄 Applications</button>
+                    <button onclick="showSection('profile')" class="w-full text-left py-2 px-4 hover:bg-blue-100 rounded transition">👤 Profile</button>
+                    <button onclick="logout()" class="w-full text-left py-2 px-4 hover:bg-red-100 rounded text-red-500 transition">🚪 Logout</button>
+                </ul>
+            </nav>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden md:hidden"></div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col">
+
+            <!-- Top Navbar -->
+            <header class="bg-white shadow-md px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <button id="openSidebar" class="lg:hidden px-4 py-2 text-blue-600"><i data-feather="menu"></i></button>
+                <h2 id="pageTitle" class="text-2xl font-semibold text-gray-800">Company Dashboard</h2>
+                <div class="flex items-center space-x-4">
+                    <div id="profileInitials" class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700 text-lg">
+                        <!--initial come here-->
+                    </div>
+                    <span id="companyName" class="font-medium text-gray-700"> <!--Company name comes here-->></span>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="p-6 bg-gray-50 min-h-screen flex-1 overflow-y-auto">
+
+                <div id="dashboard">
+                     <!-- Stat Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Internships Posted</h3>
+                            <p id="statInternships" class="mt-2 text-2xl font-bold text-blue-600">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Applications Received</h3>
+                            <p id="statApplications" class="mt-2 text-2xl font-bold text-green-600">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Active Internships</h3>
+                            <p class="mt-2 text-2xl font-bold text-yellow-600">5</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Pending Reviews</h3>
+                            <p class="mt-2 text-2xl font-bold text-purple-600">12</p>
+                        </div>
+                    </div>
+
+                <!-- Recent Applications Table -->
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Recent Applications</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm border rounded-lg">
+                        <thead class="bg-blue-600 text-white">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Student Name</th>
+                                <th class="px-4 py-2 text-left">Internship Title</th>
+                                <th class="px-4 py-2 text-left">Applied On</th>
+                                <th class="px-4 py-2 text-left">Status</th>
+                                <th class="px-4 py-2 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applications-table-body" class="bg-white divide-y">
+                        </tbody>
+                    </table>
+                </div>      
+                <div id="internshipsList"></div>   
+        </div>
+
+        <div id="my-internships" class="hidden">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">My Internships</h3>
+            <div id="myInternshipsList"></div> 
+        </div>
+
+     <!-- Post Internship Section -->
+                <div id="post-internship" class="hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Post a New Internship</h3>
+                    <form id="postInternshipForm" class="bg-white p-6 rounded-lg shadow space-y-4">
+                        <input id="internshipTitle" type="text" placeholder="Internship Title" class="w-full border px-4 py-2 rounded">
+                        <textarea id="internshipDesc" placeholder="Description" class="w-full border px-4 py-2 rounded"></textarea>
+                        <input id="internshipLocation" type="text" placeholder="Location" class="w-full border px-4 py-2 rounded">
+                        <input id="internshipStipend" type="number" placeholder="Stipend" class="w-full border px-4 py-2 rounded">
+                        <input id="internshipDeadline" type="date" placeholder="Application Deadline" class="w-full border px-4 py-2 rounded">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post Internship</button>
+                    </form>
+                </div>
+
+                <!-- Applications Section -->
+                <div id="applications" class="hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800"></h3>
+                    <!-- <p class="text-gray-600">[Full applications table will go here]</p> -->
+                     <div id="applicationsList">
+                         <!--dynamic applications show here-->
+                     </div> 
+
+                     <td class="px-4 py-2 text-center">
+                        <button onclick="viewResume('${application._id}')"></button>
+                     </td>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profile" class="hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Company Profile</h3>
+                    <div class="bg-white p-6 rounded-lg shadow space-y-2">
+                        <h2 id="profileCompanyName"></h2> <!-- empty, to be filled dynamically -->
+                        <div id="profileInitialsDetail"></div> <!-- renamed ID for uniqueness -->
+                        <p><strong>Company Name:</strong> <span id="profileCompanyNameDetail"></span></p>
+                        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                        <p><strong>Location:</strong> <span id="profileLocation"></span></p>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div id="appModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalAppTitle" class="text-xl font-bold">Application Details</h2>
+                <button onclick="closeAppModal()" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+            </div>
+            <div class="space-y-2 text-sm text-gray-700">
+                <p><strong>Student:</strong> <span id="modalStudentName">-</span></p>
+                <p><strong>Internship:</strong> <span id="modalInternship">-</span></p>
+                <p><strong>Applied On:</strong> <span id="modalAppliedDate">-</span></p>
+                <p><strong>Status:</strong>
+                    <select id="modalStatusSelect" class="w-full border rounded px-2 py-1">
+                        <option>Applied</option>
+                        <option>Pending</option>
+                        <option>Shortlisted</option>
+                        <option>Rejected</option>
+                    </select>    
+                </p>
+
+                <p><strong>Company Notes:</strong></p>
+                <textarea id="companyNotes" rows="4" class="w-full border rounded p-2" placeholder="Add notes here...."></textarea>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="saveAppStatus()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Save</button>
+                <button onclick="closeAppModal()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Function to handle showing/hiding different dashboard sections
+    function showSection(section) {
+        const sections = ['dashboard', 'my-internships', 'post-internship', 'applications', 'profile'];
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+        const sectionEl = document.getElementById(section);
+        if (sectionEl) sectionEl.classList.remove('hidden');
+        document.getElementById('pageTitle').innerText = section.charAt(0).toUpperCase() + section.slice(1).replace('-', ' ');
+
+        // Call the fetch function when the specific section is shown
+        if (section === 'my-internships') {
+            fetchMyInternships();
+        }
+
+        if(section === 'applications') {
+            //fetchRecentApplications();
+            fetchAllApplications();
+        }
+    }
+
+    // Function to handle logout
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+
+    // Function to fetch and display internships posted by the company
+    const fetchMyInternships = async () => {
+    const myInternshipsList = document.getElementById('myInternshipsList');
+    const statInternshipsEl = document.getElementById('statInternships');
+    const token = localStorage.getItem('userToken');
+
+    if (!myInternshipsList || !statInternshipsEl) {
+        console.error('Missing required HTML elements for internships.');
+        return;
+    }
+
+    if (!token) {
+        console.error('No token found. Please log in first.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:5000/api/company/internships/my-listings', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const internships = await response.json();
+        console.log('Fetched internships:', internships);
+
+        if (!Array.isArray(internships)) {
+            console.error('Expected an array of internships, got:', internships);
+            return;
+        }
+
+        // Update dashboard stat
+        statInternshipsEl.innerText = internships.length;
+
+        // Clear previous list
+        myInternshipsList.innerHTML = '';
+
+        if (internships.length === 0) {
+            myInternshipsList.innerHTML = '<p class="text-gray-600">No internships posted yet.</p>';
+            return;
+        }
+
+        // Render internships
+        internships.forEach(internship => {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-4 rounded-lg shadow mb-4';
+            div.innerHTML = `
+                <h3 class="text-xl font-bold">${internship.title}</h3>
+                <p class="text-gray-700">${internship.description}</p>
+                <button data-id="${internship._id}" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded view-applications-btn">View Applications</button>
+            `;
+            myInternshipsList.appendChild(div);
+        });
+
+        // Add event listeners for "View Applications" buttons
+        document.querySelectorAll('.view-applications-btn').forEach(button => {
+            button.addEventListener('click', viewApplications);
+        });
+        //document.getElementById('my-internships').classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Error fetching internships:', error);
+    }
+};
+
+// Function to fetch and display recent applications on the dashboard
+const fetchRecentApplications = async () => {
+  const tableBody = document.getElementById('applications-table-body');
+  const statApplicationsEl = document.getElementById('statApplications');
+  const token = localStorage.getItem('userToken');
+
+  if (!token || !tableBody || !statApplicationsEl) return;
+
+  try {
+    const response = await fetch('http://localhost:5000/api/company/applications/recent', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recent applications');
+    }
+
+    const applications = await response.json();
+
+    if (!Array.isArray(applications)) {
+      throw new Error('Invalid data format received');
+    }
+
+    // Update Applications Received stat
+    statApplicationsEl.innerText = applications.length;
+
+    // Clear existing rows
+    tableBody.innerHTML = '';
+
+    applications.forEach(app => {
+      const studentName = app.student?.name || 'N/A';
+      const internshipTitle = app.internship?.title || 'N/A';
+      const appliedDate = app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'N/A';
+      const status = app.status || 'Unknown';
+
+      // Set color class for status
+      let statusClass = 'text-gray-600';
+      switch(status) {
+        case 'Accepted': statusClass = 'text-green-600'; break;
+        case 'Rejected': statusClass = 'text-red-600'; break;
+        case 'Shortlisted': statusClass = 'text-yellow-600'; break;
+        case 'Pending': statusClass = 'text-blue-600'; break;
+        default: statusClass = 'text-gray-600';
+      }
+
+      const row = document.createElement('tr');
+      row.className = 'border-b last:border-b-0';
+      row.innerHTML = `
+        <td class="px-4 py-2">${studentName}</td>
+        <td class="px-4 py-2">${internshipTitle}</td>
+        <td class="px-4 py-2">${appliedDate}</td>
+        <td class="px-4 py-2">
+          <span class="font-medium ${statusClass}">
+            ${status}
+          </span>
+        </td>
+        <td class="px-4 py-2">
+          <button data-id="${app._id}" class="text-blue-600 hover:underline view-application-btn">View</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    // Add click listeners for "View" buttons
+    document.querySelectorAll('.view-application-btn').forEach(button => {
+      button.addEventListener('click', async (event) => {
+        const appId = event.target.dataset.id;
+        await viewSingleApplication(appId);
+      });
+    });
+  } catch (error) {
+    console.error('Error fetching recent applications:', error);
+    statApplicationsEl.innerText = '0';  // Reset stat to zero on error
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-600">Failed to load applications</td></tr>';
+  }
+};
+
+const fetchAllApplications = async () => {
+    const container = document.getElementById('applicationsList');
+    const token = localStorage.getItem('userToken');
+
+    if (!token || !container) return;
+
+    try {
+        const response = await fetch('http://localhost:5000/api/company/applications', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch all applications');
+        }
+
+        const applications = await response.json();
+
+        container.innerHTML = '<h3 class="text-xl font-bold mb-4">All Applications</h3>';
+
+        if (!applications.length) {
+            container.innerHTML += '<p class="text-gray-600">No applications found.</p>';
+            return;
+        }
+
+        applications.forEach(app => {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-100 p-3 rounded-lg mb-2';
+            div.innerHTML = `
+                <p><strong>Student:</strong> ${app.student?.name || 'N/A'}</p>
+                <p><strong>Email:</strong> ${app.student?.email || 'N/A'}</p>
+                <p><strong>Internship:</strong> ${app.internship?.title || 'N/A'}</p>
+                <p><strong>Status:</strong> ${app.status || 'N/A'}</p>
+                ${app._id ? `<button onclick="viewResume('${app._id}')" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded">View Resume</button>` : ''}
+            `;
+            container.appendChild(div);
+        });
+    } catch (error) {
+        console.error('Error fetching all applications:', error);
+        container.innerHTML = '<p class="text-red-600">Failed to load applications.</p>';
+    }
+};
+
+    // Function to view applications for a specific internship
+const viewApplications = async (event) => {
+    const internshipId = event.target.dataset.id;
+    const token = localStorage.getItem('userToken');
+    const container = document.getElementById('applicationsList');
+
+    if (!internshipId || !token || !container) return;
+
+    try {
+        const response = await fetch(`http://localhost:5000/api/company/internships/${internshipId}/applications`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const applications = await response.json();
+
+        container.innerHTML = `<h3 class="text-xl font-bold mb-4">Applications for this Internship</h3>`;
+
+        if (!applications.length) {
+            container.innerHTML += '<p class="text-gray-600">No applications received yet for this internship.</p>';
+        } else {
+            applications.forEach(app => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-100 p-3 rounded-lg mb-2';
+                div.innerHTML = `
+                    <p><strong>Student:</strong> ${app.student.name}</p>
+                    <p><strong>Email:</strong> ${app.student.email}</p>
+                    <p><strong>Status:</strong> ${app.status}</p>
+                    <div class="mt-2">
+                        <button onclick="viewResume('${app._id}')" class="bg-blue-500 text-white px-3 py-1 rounded">View Resume</button>
+                        <button class="bg-green-500 text-white px-3 py-1 rounded update-status-btn" data-id="${app._id}" data-status="Shortlisted">Shortlist</button>
+                        <button class="bg-red-500 text-white px-3 py-1 rounded update-status-btn" data-id="${app._id}" data-status="Rejected">Reject</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            // Add listeners for status buttons
+            document.querySelectorAll('.update-status-btn').forEach(btn => {
+                btn.addEventListener('click', updateApplicationStatus);
+            });
+        }
+
+        // Show the applications section
+        showSection('applications');
+    } catch (error) {
+        console.error('Error fetching applications for internship:', error);
+    }
+};
+
+
+    // Function to update the application status
+    const updateApplicationStatus = async (event) => {
+        const applicationId = event.target.dataset.id;
+        const newStatus = event.target.dataset.status;
+        const token = localStorage.getItem('userToken');
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/company/applications/${applicationId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                alert(`Application status updated to ${newStatus}`);
+                // Refresh the list after update. You'll need to re-call viewApplications, but with the internshipId.
+                // For now, you can just reload the page or navigate back to the internship list.
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
+    };
+
+    //function to view student resume
+    function viewResume(applicationId){
+        const token = localStorage.getItem("userToken");
+        const url= `http://localhost:5000/api/company/applications/${applicationId}/resume`;
+        
+        fetch(url ,{
+            method: "GET",
+            headers: {"Authorization" : `Bearer ${token}`}
+        })
+        .then(response =>{
+            if(!response.ok) throw new Error("Failed to fetch resume");
+            return response.blob();
+        })
+        .then(blob =>{
+            const fileURL = URL.createObjectURL(blob);
+            window.open(fileURL, "_blank");
+        })
+        .catch(err =>{
+            console.error("Error fetching resume: ",err);
+            alert("Could not load resume");
+        });
+    }
+
+    let currentlyViewedApplicationId = null;
+
+    // Function to view application details and fill modal including notes
+    async function viewSingleApplication(appId) {
+        const token = localStorage.getItem('userToken');
+        try {
+            const res = await fetch(`http://localhost:5000/api/company/applications/${appId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const application = await res.json();
+
+        document.getElementById('modalAppTitle').innerText = `Application Details - ${application.student.name}`;
+        document.getElementById('modalStudentName').innerText = application.student.name;
+        document.getElementById('modalInternship').innerText = application.internship.title;
+        document.getElementById('modalAppliedDate').innerText = new Date(application.createdAt).toLocaleDateString();
+
+        document.getElementById('modalStatusSelect').value = application.status || 'Pending';
+        document.getElementById('companyNotes').value = application.companyNotes || '';
+
+        currentlyViewedApplicationId = appId;
+
+        document.getElementById('appModal').classList.remove('hidden');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load application details');
+        }
+    }
+
+    // Function to save status and company notes
+    async function saveAppStatus() {
+        const status = document.getElementById('modalStatusSelect').value;
+        const companyNotes = document.getElementById('companyNotes').value;
+        const applicationId = currentlyViewedApplicationId;
+
+        const token = localStorage.getItem('userToken');
+        try {
+            const res = await fetch(`http://localhost:5000/api/company/applications/${applicationId}/update`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ status, companyNotes })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert('Application updated successfully!');
+                closeAppModal();
+                fetchRecentApplications();
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+                console.error(err);
+                alert('Failed to update application.');
+        }
+    }
+
+    // Function to close modal
+    function closeAppModal() {
+        document.getElementById('appModal').classList.add('hidden');
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('userToken'); 
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (user) {
+            document.getElementById('companyName').innerText = user.companyName || 'N/A';
+            document.getElementById('profileCompanyNameDetail').innerText = user.companyName || 'N/A';
+            document.getElementById('profileEmail').innerText = user.email || 'N/A';
+            document.getElementById('profileLocation').innerText = user.location || 'N/A';
+
+            const initials = user.companyName ? user.companyName.charAt(0).toUpperCase() : 'C';
+            document.getElementById('profileInitials').innerText = initials;
+        }
+
+        if (!token || !user || user.role !== 'company') {
+            alert('Access denied. Please log in as a company.');
+            localStorage.clear();
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const hamburgerBtn = document.getElementById('openSidebar'); // Updated ID
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (hamburgerBtn && sidebar && sidebarOverlay) {
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('hidden');
+            });
+
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            });
+        }
+
+        // Call feather.replace() to render icons
+        if (window.feather) {
+            feather.replace();
+        }
+
+        const postInternshipForm = document.getElementById('postInternshipForm');
+
+        if (postInternshipForm) {
+            postInternshipForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('internshipTitle').value;
+                const description = document.getElementById('internshipDesc').value;
+                const location = document.getElementById('internshipLocation').value;
+                const stipend = document.getElementById('internshipStipend').value;
+                const deadline = document.getElementById('internshipDeadline').value;
+
+                try {
+                    const response = await fetch('http://localhost:5000/api/company/internships', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ 
+                            companyName: user.companyName,
+                            title, 
+                            description, 
+                            location, 
+                            stipend, 
+                            deadline })
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert('Internship posted successfully!');
+                        postInternshipForm.reset();
+                        fetchMyInternships(); 
+                        showSection('my-internships');
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error posting internship:', error);
+                }
+            });
+        }
+        
+        // Initial page load: Fetch data for both sections
+        fetchMyInternships();
+        fetchRecentApplications();
+    });
+</script>
+
+</body>
+</html>

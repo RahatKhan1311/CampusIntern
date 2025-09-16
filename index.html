@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>CampusIntern</title>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body class="bg-[#F9FAFB] font-sans ">
+
+  <!-- Navbar -->
+ <nav class="w-full bg-white shadow py-4 px-4 md:px-8">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+    <div class="text-2xl font-bold text-blue-600">CampusIntern</div>
+    <div class="flex flex-wrap items-center gap-4 mt-4 md:mt-0 text-sm font-medium text-gray-700">
+      <a href="login.html" class="hover:text-blue-700 transition">Admin</a>
+      <a href="#home" class="hover:text-blue-700 transition">Home</a>
+      <a href="#features" class="hover:text-blue-700 transition">Features</a>
+      <a href="#companies" class="hover:text-blue-700 transition">Companies</a>
+      <a href="#contact" class="hover:text-blue-700 transition">Contact</a>
+      <a href="login.html" class="hover:text-blue-700 transition">Login</a>
+      <a href="signup.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="py-12 ">
+    <div class="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col-reverse lg:flex-row items-center">
+      <!-- Left Content -->
+      <div class="w-full lg:w-1/2 text-center lg:text-left mt-8 lg:mt-0">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+          Smart Internship allotment<br />for campuses
+        </h1>
+        <p class="text-gray-600 text-lg mb-6">
+          Find, apply and get hired - all in one place.
+        </p>
+        <a href="internships.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-base font-semibold">Explore Internships</a>
+      </div>
+
+      <!-- Right Image -->
+      <div class="w-full lg:w-1/2 flex justify-center">
+        <img src="illustration.jpg" alt="Internship Allocation" class="w-full max-w-sm"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-white text-center">
+    <h2 class="text-4xl font-bold mb-6">Features</h2>
+    <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6 px-4">
+      <div class="bg-gray-100 rounded-xl p-6 hover:bg-blue-100 shadow-md transition-transform transform hover:scale-105 active:scale-95 cursor-pointer">
+        <h3 class="text-xl font-semibold">🎯 Smart Internship Matching</h3>
+      </div>
+      <div class="bg-gray-100 rounded-xl p-6 hover:bg-green-100 shadow-md transition-transform transform hover:scale-105 active:scale-95 cursor-pointer">
+        <h3 class="text-xl font-semibold">🧑‍💼 Role-based Dashboard</h3>
+      </div>
+      <div class="bg-gray-100 rounded-xl p-6 hover:bg-yellow-100 shadow-md transition-transform transform hover:scale-105 active:scale-95 cursor-pointer">
+        <h3 class="text-xl font-semibold">📍 Real-time Tracking</h3>
+      </div>
+      <div class="bg-gray-100 rounded-xl p-6 hover:bg-purple-100 shadow-md transition-transform transform hover:scale-105 active:scale-95 cursor-pointer">
+        <h3 class="text-xl font-semibold">📄 Offer Letter Uploads</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- Companies Section -->
+  <section id="companies" class="py-20 bg-gray-100 text-center">
+    <h2 class="text-3xl font-bold mb-6">Our Partner Companies</h2>
+    <div class="flex flex-wrap justify-center gap-8 px-4">
+      <img src="Google.png" alt="Google" class="h-14 object-contain" />
+      <img src="tcs.png" alt="TCS" class="h-14 object-contain" />
+      <img src="wipro.png" alt="Wipro" class="h-14 object-contain" />
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-20 bg-white text-center">
+    <h2 class="text-3xl font-bold mb-6">Contact Us</h2>
+    <form class="max-w-md mx-auto space-y-4 px-4">
+      <input type="text" placeholder="Your name" class="w-full border p-3 rounded" />
+      <input type="email" placeholder="Your email" class="w-full border p-3 rounded" />
+      <textarea placeholder="Your message" class="w-full border p-3 rounded"></textarea>
+      <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">Send</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-300">
+      <div class="mb-4 md:mb-0 text-center md:text-left">
+        © 2025 CampusIntern. All rights reserved.
+      </div>
+      <div class="flex gap-4 justify-center md:justify-end">
+        <a href="#home" class="hover:text-blue-400 transition">Home</a>
+        <a href="#features" class="hover:text-blue-400 transition">Features</a>
+        <a href="#companies" class="hover:text-blue-400 transition">Companies</a>
+        <a href="#contact" class="hover:text-blue-400 transition">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

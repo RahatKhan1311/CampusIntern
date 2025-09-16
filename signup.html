@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup - CampusIntern</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  
+</head>
+<body class="min-h-screen flex items-center justify-center bg--gray-50">
+    <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+        <!--signup form-->
+        <form class="space-y-4">
+            <h1 class="text-3xl text-center font-extrabold text-blue-600 mb-4">CampusIntern</h1>
+            <h2 class="text-xl text-center font-bold mb-2" >Create Your Account </h2>
+            <p class="text-sm text-center text-gray-600 mb-6">Sign up to get started</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+                <input type="text" required placeholder="Your name"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" required placeholder="you@gmail.com"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" required placeholder="Password"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input type="password" required placeholder="Confirm Password"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!--role selection-->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Register As</label>
+                <select required class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="student">Student</option>
+                    <option value="company">Company</option>
+                </select>
+            </div>
+
+            <!--Terms and conditions-->
+            <div class="mb-4 flex items-center">
+                <input type="checkbox" required class="mr-2">
+                <label class="text-sm text-gray-700 ">I agree to the <a href="#" class="text-blue-600 hover:underline">terms & conditions</a></label>
+            </div>
+
+            <button class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Sign Up</button>
+
+            <p class="text-sm text-center text-gray-600">
+                Already have an account?
+                <a href="login.html" class="text-blue-600 hover:underline">Login</a>
+            </p>
+        </form>    
+        </div>
+        
+    </div>   
+    
+    <script>
+document.querySelector('form').addEventListener('submit', async function(event) {
+  event.preventDefault();  // Prevent page reload
+
+  // Collect form data
+  const name = this.querySelector('input[type="text"]').value.trim();
+  const email = this.querySelector('input[type="email"]').value.trim();
+  const password = this.querySelector('input[type="password"]').value.trim();
+  const role = this.querySelector('select').value;
+
+  
+console.log('Name:', name);
+console.log('Email:', email);
+console.log('Password:', password);
+console.log('Role:', role);
+
+  // Basic validation
+  if (!name || !email || !password || !role) {
+    alert('Please fill all fields and select a role');
+    return;
+  }
+  const roleLower = role.toLowerCase();
+  const endpoint = roleLower === 'company'
+  ? 'http://localhost:5000/api/company/register'
+  : 'http://localhost:5000/api/auth/register/student';
+
+  // Send POST request to backend
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, email, password })  // role is not needed in payload
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      alert('Server did not return JSON. Possibly wrong endpoint or server error.');
+      return;
+    }
+
+
+    if (res.ok) {
+      alert(data.message || `${roleLower.charAt(0).toUpperCase() + roleLower.slice(1)} registered successfully!`);
+      window.location.href = 'login.html';
+    } else {
+      alert(data.message || 'Registration failed.');
+    }
+  } catch (err) {
+    console.error('fetch error:', err);
+    alert('Network error: ' + err.message);
+  }
+});
+</script>
+
+</body>
+</html>
