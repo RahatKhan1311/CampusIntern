@@ -35,14 +35,21 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/campusinter
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Root route
-app.get('/', (req, res) => {
-  res.send('Backend server is running');
-});
+// app.get('/', (req, res) => {
+//   res.send('Backend server is running');
+// });
 
 // Error-handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack || err);
   res.status(500).json({ message: err.message || 'Internal Server Error' });
+});
+
+// Serve frontend
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
