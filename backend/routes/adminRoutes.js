@@ -308,5 +308,59 @@ router.post('/add-admin' , authenticateToken, authorizeAdmin,
     }
 });
 
+// Company-wise offers
+router.get('/reports/company-offers', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        const offers = await InternshipApplication.aggregate([
+            { $match: { status: "Selected" } },
+            {
+                $lookup: {
+                    from: "companies",
+                    localField: "company",
+                    foreignField: "_id",
+                    as: "companyData"
+                }
+            },
+            { $unwind: "$companyData" },
+            {
+                $group: {
+                    _id: "$companyData.name",
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.json(offers);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+// Applications trend (per month)
+router.get('/reports/applications-trend', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        const trend = await InternshipApplication.aggregate([
+            {
+                $group: {
+                    _id: { $month: "$createdAt" }, // month number 1-12
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id": 1 } }
+        ]);
+
+        // Optional: convert month number to name
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const formattedTrend = trend.map(t => ({ month: months[t._id - 1], count: t.count }));
+
+        res.json(formattedTrend);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 module.exports = router;

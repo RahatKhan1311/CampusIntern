@@ -1,3 +1,7 @@
+// ===== REPORT CHART INSTANCES =====
+let companyChartInstance = null;  
+let applicationChartInstance = null; 
+
 // Toggle sidebar on mobile
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
@@ -21,6 +25,7 @@ function logout() {
     localStorage.removeItem('user');
     window.location.href = 'login.html';
 }
+
 
 // Function to fetch and display dashboard counts from the backend.
 async function loadDashboardCounts() {
@@ -509,6 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (sectionId === 'users') loadUsers();
                 if (sectionId === 'applications') loadApplications();
                 if (sectionId === 'internships') loadInternships();
+                if (sectionId === 'reports') renderReportsCharts();
             }
         });
     });
@@ -683,6 +689,126 @@ if (addAdminForm) {
     });
 }
 
+// Chart 1: Company-wise Offers
+  const companyCtx = document.getElementById('companyChart').getContext('2d');
+  const companyChart = new Chart(companyCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Google', 'TCS', 'Wipro', 'Infosys', 'Microsoft'],
+      datasets: [{
+        label: 'Offers',
+        data: [25, 40, 30, 20, 15],
+        backgroundColor: ['#3B82F6', '#10B981', '#FBBF24', '#8B5CF6', '#EF4444'],
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 
+  // Chart 2: Applications Trend
+  const trendCtx = document.getElementById('applicationTrendChart').getContext('2d');
+  const applicationTrendChart = new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Applications',
+        data: [100, 150, 200, 250, 300, 400],
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: '#3B82F6',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#3B82F6'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // ===== RENDER REPORTS CHARTS =====
+async function renderReportsCharts() {
+    const token = localStorage.getItem('userToken');
+
+    try {
+        // -------- Chart 1: Company-wise offers --------
+        const companyRes = await fetch('http://localhost:5000/api/admin/reports/company-offers', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const companyData = await companyRes.json();
+
+        if (!Array.isArray(companyData)) throw new Error('Invalid company data');
+
+        const companyLabels = companyData.map(c => c._id || 'Unknown');
+        const companyCounts = companyData.map(c => c.count || 0);
+
+        // Destroy previous instance if exists
+        if (companyChartInstance) companyChartInstance.destroy();
+
+        companyChartInstance = new Chart(document.getElementById('reportsCompanyChart'), {
+            type: 'bar',
+            data: {
+                labels: companyLabels,
+                datasets: [{
+                    label: 'Selected Offers',
+                    data: companyCounts,
+                    backgroundColor: 'rgba(99,102,241,0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: { display: true, text: 'Company-wise Selected Offers' }
+                }
+            }
+        });
+
+        // -------- Chart 2: Applications Trend --------
+        const trendRes = await fetch('http://localhost:5000/api/admin/reports/applications-trend', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const trendData = await trendRes.json();
+
+        if (!Array.isArray(trendData)) throw new Error('Invalid trend data');
+
+        const trendLabels = trendData.map(t => t.month);
+        const trendCounts = trendData.map(t => t.count);
+
+
+        // Destroy previous instance if exists
+        if (applicationChartInstance) applicationChartInstance.destroy();
+
+        applicationChartInstance = new Chart(document.getElementById('reportsApplicationChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Applications',
+                    data: trendCounts,
+                    borderColor: 'rgba(16,185,129,1)',
+                    fill: false,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: { display: true, text: 'Applications Trend per Month' }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error('Error rendering reports charts:', err);
+    }
+}
 
 });

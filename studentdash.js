@@ -43,12 +43,44 @@ async function loadProfile() {
         userCircle.textContent = profile.name ? profile.name.split(' ').map(n => n[0]).join('') : '';
         const userNameSpan = document.querySelector('header span.font-medium');
         userNameSpan.textContent = profile.name || '';
+
+        const achievementsDisplay = document.getElementById('achievementsDisplay');
+        achievementsDisplay.innerHTML = '';
+        (profile.achievements || []).forEach(a => {
+            const li = document.createElement('li');
+            li.textContent = a;
+            achievementsDisplay.appendChild(li);
+        });
         
     } catch (error) {
         console.error("Error in loadProfile:", error);
         throw error;
     }
 }
+
+async function loadDashboardStats() {
+    const token = localStorage.getItem('userToken');
+    if (!token) return;
+
+    try {
+        const res = await fetch('http://localhost:5000/api/student/dashboard-stats', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+
+        const stats = await res.json();
+
+        // Update numbers in HTML
+        document.getElementById('totalApplications').textContent = stats.totalApplications;
+        document.getElementById('offersReceived').textContent = stats.offersReceived;
+        document.getElementById('pendingInterviews').textContent = stats.pendingInterviews;
+        document.getElementById('profileCompletion').textContent = stats.profileCompletion + '%';
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 
 //Announcements: Fetch & Display (readonly for Students)
 async function loadAnnouncements() {
@@ -116,6 +148,7 @@ async function loadApplications() {
         const applications = await res.json();
         console.log("Applications fetched:", applications);
 
+        localStorage.setItem('applications', JSON.stringify(applications));
         updateApplicationsTable(applications);
     } catch (error) {
         console.error("Error in loadApplications:", error.message);
@@ -466,9 +499,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     try {
         await loadProfile();
+        await loadDashboardStats();
         await loadInternships();
         await loadApplications();
         await loadAnnouncements();
+
+        updateDashboardDynamicContent(); // dynamically fills welcome, stats, recent apps, top internships, announcements
+
         showSection('dashboard');
         
     } catch (error) {
@@ -502,6 +539,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editName = document.getElementById('editName');
     const editEmail = document.getElementById('editEmail');
     const editCourse = document.getElementById('editCourse');
+    const achievementsList = document.getElementById('achievements-list');
+    const achievementsDisplay = document.getElementById('achievementsDisplay');
+    const addAchievementBtn = document.getElementById('addAchievementBtn');
 
     // Open modal and prefill fields
     editProfileBtn.addEventListener('click', () => {
@@ -509,6 +549,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         editName.value = document.getElementById('profileName').innerText.trim();
         editEmail.value = document.getElementById('profileEmail').innerText.replace('Email: ', '').trim();
         editCourse.value = document.getElementById('profileCourse').innerText.replace('—', '').trim();
+
+        // Prefill achievements
+        const existingAchievements = Array.from(achievementsDisplay.querySelectorAll('li')).map(li => li.textContent);
+        achievementsList.innerHTML = ''; // clear current fields
+
+        if (existingAchievements.length > 0) {
+            existingAchievements.forEach(a => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'achievements[]';
+                input.value = a;
+                input.placeholder = 'Enter achievement';
+                input.className = 'w-full border p-2 rounded mb-2';
+                achievementsList.appendChild(input);
+            });
+        } else {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'achievements[]';
+            input.placeholder = 'Enter achievement';
+            input.className = 'w-full border p-2 rounded mb-2';
+            achievementsList.appendChild(input);
+        }
 
         // Show modal
         editProfileModal.classList.remove('hidden');
@@ -519,14 +582,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         editProfileModal.classList.add('hidden');
     }
 
+    //  Add more achievement fields dynamically 
+    addAchievementBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'achievements[]';
+        input.placeholder = 'Enter another achievement';
+        input.className = 'w-full border p-2 rounded mb-2';
+        achievementsList.appendChild(input);
+    }); 
+
     // Handle form submission
     editProfileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const achievementInputs = document.querySelectorAll('input[name="achievements[]"]');
+        const achievements = Array.from(achievementInputs)
+                              .map(input => input.value.trim())
+                              .filter(a => a); // remove empty entries
+
         const updatedData = {
             name: editName.value,
             email: editEmail.value,
-            course: editCourse.value
+            course: editCourse.value,
+            achievements: achievements
         };
 
         const token = localStorage.getItem('userToken');
@@ -549,6 +628,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('profileEmail').innerText = 'Email: ' + updatedData.email;
                 document.getElementById('profileCourse').innerText = updatedData.course || '—';
 
+                achievementsDisplay.innerHTML = ''; // clear old list
+                updatedData.achievements.forEach(a => {
+                    const li = document.createElement('li');
+                    li.textContent = a;
+                    achievementsDisplay.appendChild(li);
+                });
+
                 closeEditModal();
                 alert('Profile updated successfully!');
             } else {
@@ -559,5 +645,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Server error. Try again later.');
         }
     });
+
+
+    function updateDashboardDynamicContent() {
+    const profile = JSON.parse(localStorage.getItem('user')) || {};
+    const applications = JSON.parse(localStorage.getItem('applications')) || [];
+    const internships = JSON.parse(localStorage.getItem('internships')) || [];
+    const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+
+    // Dashboard Welcome Card
+    const welcomeCardName = document.getElementById('welcomeCardName');
+    if (welcomeCardName) welcomeCardName.textContent = profile.name || 'Student';
+
+    // Sidebar / Header
+    const userNameElem = document.querySelector('header span.font-medium');
+    const userCircleElem = document.querySelector('header div.w-9');
+
+    if (userNameElem) userNameElem.textContent = profile.name || 'John Doe';
+    if (userCircleElem) userCircleElem.textContent = profile.name 
+        ? profile.name.split(' ').map(n => n[0]).join('') 
+        : 'S';
+
+    // Profile Completion Bar
+    const profileCompletion = profile.profileCompletion ?? 100;
+    const progressBar = document.getElementById('profileProgressBar');
+    if (progressBar) progressBar.style.width = profileCompletion + '%';
+    const profileCompletionText = document.getElementById('profileCompletion');
+    if (profileCompletionText) profileCompletionText.textContent = profileCompletion + '%';
+
+    // Dashboard Stats
+    const totalApplicationsElem = document.getElementById('totalApplications');
+    const offersReceivedElem = document.getElementById('offersReceived');
+    const pendingInterviewsElem = document.getElementById('pendingInterviews');
+
+    if (totalApplicationsElem) totalApplicationsElem.textContent = applications.length;
+    if (offersReceivedElem) offersReceivedElem.textContent = applications.filter(a => a.status === 'Accepted' || a.status === 'Offered').length;
+    if (pendingInterviewsElem) pendingInterviewsElem.textContent = applications.filter(a => a.status === 'Pending' || a.status === 'Interview').length;
+
+    // Latest Announcements
+    const dashAnnouncements = document.getElementById('dashboardAnnouncements');
+    if(dashAnnouncements){
+        dashAnnouncements.innerHTML = '';
+        announcements.slice(0,3).forEach(a => {
+            const li = document.createElement('li');
+            li.className = 'bg-white p-3 rounded shadow cursor-pointer hover:bg-blue-50';
+            li.textContent = `${a.message} (${new Date(a.createdAt).toLocaleDateString()})`;
+            dashAnnouncements.appendChild(li);
+        });
+    }
+}
 
 });

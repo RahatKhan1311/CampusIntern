@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,35 +11,68 @@
 
 </head>
 <style>
-    #internModal{
+    body {
+        background-image: url('https://user-gen-media-assets.s3.amazonaws.com/seedream_images/e0bd7176-3ff4-4b32-90f5-b5f902e6a5aa.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        position: relative;
+    }
+
+    /* overlay effect */
+    body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.7);
+        /* light overlay for readability */
+        backdrop-filter: blur(2px);
+        /* optional: glassy look */
+        z-index: -1;
+    }
+
+    #internModal {
         transition: opacity 0.3s ease;
     }
-    .hidden{
+
+    .hidden {
         opacity: 0;
         pointer-events: none;
     }
 </style>
-<body class="bg-gray-100 font-sans"> 
+
+<body class="relative font-sans">
     <button id="hamburgerBtn" class="md:hidden mr-4 text-gray-800 focus:outline-none">
-    <i data-feather="menu"></i>
-</button>
+        <i data-feather="menu"></i>
+    </button>
     <!-- wrapper-->
-     <div class="flex min-h-screen">
+    <div class="flex min-h-screen">
 
         <!--side bar-->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 md:static md:inset-auto md:shadow-none">
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 md:static md:inset-auto md:shadow-none">
             <div class="p-6 border-b border-gray-200">
                 <h1 class="text-2xl font-bold text-blue-600">CampusIntern</h1>
             </div>
 
             <nav class="mt-6">
                 <ul class="space-y-2">
-                    <li><a onclick="showSection('dashboard')" class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">🏠 Dashboard</a></li>
-                    <li><a onclick="showSection('internships')" class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">💼 Internships</a></li>
-                    <li><button onclick="showSection('applications')" class="w-full text-left px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">
-                        📄 Applications</button></li>
-                    <li><a onclick="showSection('announcements')" class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">📢 Announcements</a></li>    
-                    <li><a onclick="showSection('profile')" class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">👤 Profile</a></li>
+                    <li><a onclick="showSection('dashboard')"
+                            class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">🏠
+                            Dashboard</a></li>
+                    <li><a onclick="showSection('internships')"
+                            class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">💼
+                            Internships</a></li>
+                    <li><button onclick="showSection('applications')"
+                            class="w-full text-left px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">
+                            📄 Applications</button></li>
+                    <li><a onclick="showSection('announcements')"
+                            class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">📢
+                            Announcements</a></li>
+                    <li><a onclick="showSection('profile')"
+                            class="block px-6 py-3 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium transition">👤
+                            Profile</a></li>
 
                 </ul>
             </nav>
@@ -52,7 +86,8 @@
                 <h2 class="text-2xl font-semibold text-gray-800">Student Dashboard</h2>
 
                 <div class="flex items-center space-x-4">
-                    <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700 text-lg">
+                    <div
+                        class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700 text-lg">
                         JD
                     </div>
                     <span class="font-medium text-gray-700">John Doe</span>
@@ -60,76 +95,120 @@
             </header>
 
             <!-- cards section-->
-             <main class="p-6 bg-gray-50 min-h-screen flex-1 overflow-y-auto">
+            <main class="p-6 min-h-screen flex-1 overflow-y-auto">
 
-                <!-- profile summary card-->
-                <section id="profile" class="hidden">
-                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 flex items-center justify-between">
-                    <div class="space-y-2">
-                        <h3 id="profileName" class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <i data-feather="user" class="w-5 h-5 text-blue-600"></i>Loading...</h3>
-                        <p id="profileCourse" class="text-sm text-gray-600 flex items-center gap-1">
-                        <i data-feather="book-open" class="w-4 h-4 text-gray-500"></i>—</p>
-                        <p id="profileEmail" class="text-sm text-gray-600 flex items-center gap-1">
-                        <i data-feather="mail" class="w-4 h-4 text-gray-500"></i>Email: —</p>
+                <!-- Welcome Card -->
+                <div class="bg-white rounded-xl shadow p-6 mb-6 flex flex-col md:flex-row items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Welcome back, <span
+                                id="welcomeCardName">Student</span> 👋</h2>
+                        <p class="text-gray-500 mt-1">Keep track of your applications and explore new internships today!
+                        </p>
                     </div>
-                    <button id="editProfileBtn" class="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-200">Edit Profile</button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="Internship"
+                        class="w-20 h-20 mt-4 md:mt-0">
                 </div>
+
+                <!-- Profile + Welcome Section -->
+                <section id="profile" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+                        <!-- Profile Card -->
+                        <div class="bg-white rounded-2xl shadow-md p-6 flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <h3 id="profileName" class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                    <i data-feather="user" class="w-5 h-5 text-blue-600"></i>Loading...
+                                </h3>
+                                <p id="profileCourse" class="text-sm text-gray-600 flex items-center gap-1">
+                                    <i data-feather="book-open" class="w-4 h-4 text-gray-500"></i>—
+                                </p>
+                                <p id="profileEmail" class="text-sm text-gray-600 flex items-center gap-1">
+                                    <i data-feather="mail" class="w-4 h-4 text-gray-500"></i>Email: —
+                                </p>
+                                <p id="profileAchievements" class="text-sm text-gray-600 flex flex-col gap-1">
+                                    <span class="flex items-center gap-1">
+                                        <i data-feather="award" class="w-4 h-4 text-yellow-500"></i>Academic
+                                        Achievements:
+                                    </span>
+                                <ul id="achievementsDisplay" class="list-disc list-inside text-gray-700"></ul>
+                                </p>
+                            </div>
+                            <button id="editProfileBtn"
+                                class="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-200">Edit
+                                Profile</button>
+                        </div>
+                    </div>
                 </section>
 
-                <div id="editProfileModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden p-4 z-50">
+
+                <div id="editProfileModal"
+                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden p-4 z-50">
                     <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mx-auto">
                         <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">Edit Profile</h2>
-                        <button onclick="closeEditModal()" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+                            <h2 class="text-xl font-bold">Edit Profile</h2>
+                            <button onclick="closeEditModal()"
+                                class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
                         </div>
                         <form id="editProfileForm" class="space-y-4">
-                        <div>
-                            <label class="block mb-1 font-medium">Name</label>
-                            <input type="text" id="editName" class="w-full border p-2 rounded" required>
-                        </div>
-                        <div>
-                            <label class="block mb-1 font-medium">Email</label>
-                            <input type="email" id="editEmail" class="w-full border p-2 rounded" required>
-                        </div>
-                        <div>
-                            <label class="block mb-1 font-medium">Course</label>
-                            <input type="text" id="editCourse" class="w-full border p-2 rounded">
-                        </div>
-                        <div class="text-right">
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
-                        </div>
+                            <div>
+                                <label class="block mb-1 font-medium">Name</label>
+                                <input type="text" id="editName" class="w-full border p-2 rounded" required>
+                            </div>
+                            <div>
+                                <label class="block mb-1 font-medium">Email</label>
+                                <input type="email" id="editEmail" class="w-full border p-2 rounded" required>
+                            </div>
+                            <div>
+                                <label class="block mb-1 font-medium">Course</label>
+                                <input type="text" id="editCourse" class="w-full border p-2 rounded">
+                            </div>
+                            <div>
+                                <label class="block mb-1 font-medium">Academic Achievements</label>
+                                <div id="achievements-list">
+                                    <input type="text" name="achievements[]" class="w-full border p-2 rounded mb-2"
+                                        placeholder="Enter achievement">
+                                </div>
+                                <button type="button" id="addAchievementBtn"
+                                    class="px-3 py-1 bg-green-600 text-white rounded">+ Add More</button>
+                            </div>
+                            <div class="text-right">
+                                <button type="submit"
+                                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+                            </div>
                         </form>
                     </div>
-                    </div>
-
+                </div>
 
                 <!--dashboard cards-->
                 <section id="dashboard">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-xl shadow p-4">
-                        <h3 class="text-sm text-gray-500">Total Applications</h3>
-                        <p class="mt-2 text-2xl font-bold text-blue-600">12</p>
-                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Total Applications</h3>
+                            <p id="totalApplications" class="mt-2 text-2xl font-bold text-blue-600">0</p>
+                        </div>
 
-                    <!-- offers received-->
-                    <div class="bg-white rounded-xl shadow p-4">
-                        <h3 class="text-sm text-gray-500">Offers Received</h3>
-                        <p class="mt-2 text-2xl font-bold text-green-600">3</p>
-                    </div>
-                    
-                    <!--pending interviews-->
-                    <div class="bg-white rounded-xl shadow p-4">
-                        <h3 class="text-sm text-gray-500">Pending Interviews</h3>
-                        <p class="mt-2 text-2xl font-bold text-yellow-600">2</p>
-                    </div>
+                        <!-- offers received-->
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Offers Received</h3>
+                            <p id="offersReceived" class="mt-2 text-2xl font-bold text-green-600">0</p>
+                        </div>
 
-                    <!--Profile completion-->
-                    <div class="bg-white rounded-xl shadow p-4">
-                        <h3 class="text-sm text-gray-500">Profile Completion</h3>
-                        <p class="mt-2 text-2xl font-bold text-purple-600">85%</p>
+                        <!--pending interviews-->
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Pending Interviews</h3>
+                            <p id="pendingInterviews" class="mt-2 text-2xl font-bold text-yellow-600">0</p>
+                        </div>
+
+                        <!--Profile completion-->
+                        <div class="bg-white rounded-xl shadow p-4">
+                            <h3 class="text-sm text-gray-500">Profile Completion</h3>
+                            <p id="profileCompletion" class="mt-2 text-2xl font-bold text-purple-600">0%</p>
+                            <div class="h-2 bg-purple-100 rounded-full">
+                                <div id="profileProgressBar" class="h-2 bg-purple-600 rounded-full" style="width:0%">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
                 </section>
 
                 <!--application section-->
@@ -150,7 +229,7 @@
                             </thead>
                             <tbody id="applicationsTableBody" class="bg-white divide-y">
                                 <!-- rows will be inserted dynamically-->
-                                
+
                             </tbody>
                         </table>
                     </div>
@@ -158,48 +237,49 @@
 
                 <!--Internship section-->
                 <section id="internships" class="hidden mt-10">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Recent Internships</h3>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Recent Internships</h3>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
 
-                        <!--Dynamic cards-->
-                        <div id="internshipsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                    </section>
+                    <!--Dynamic cards-->
+                    <div id="internshipsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </section>
 
-                    <!--Announcements section(readonly)-->
-                    <section id="announcements" class="hidden">
-                        <h3 class="text-xl font-bold mb-4">Announcements</h3>
-                        <h4 class="text-lg font-semibold mt-4">Latest Announcements</h4>
-                        <ul class="mt-2 space-y-2">
-                            <!-- announcements will be loaded dynamically  -->
-                        </ul>
-                    </section>
-             </main>
+                <!--Announcements section(readonly)-->
+                <section id="announcements" class="hidden">
+                    <h3 class="text-xl font-bold mb-4">Announcements</h3>
+                    <h4 class="text-lg font-semibold mt-4">Latest Announcements</h4>
+                    <ul class="mt-2 space-y-2">
+                        <!-- announcements will be loaded dynamically  -->
+                    </ul>
+                </section>
+            </main>
         </div>
-     </div>
+    </div>
 
 
-     <!--Modal-->
-     <div id="internModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg mx-auto">
-    <div class="flex justify-between items-center mb-4">
-      <h2 id="modalTitle" class="text-xl font-bold break-words">Internship Title</h2>
-      <button onclick="closeModal()" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+    <!--Modal-->
+    <div id="internModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold break-words">Internship Title</h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4 text-sm text-gray-700">
+                <p><strong>Description:</strong> <span id="modalDescription" class="break-words">-</span></p>
+                <p><strong>Stipend:</strong> <span id="modalStipend" class="break-words">-</span></p>
+                <p><strong>Location:</strong> <span id="modalLocation" class="break-words">-</span></p>
+                <p><strong>Deadline:</strong> <span id="modalDeadline">-</span></p>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="applyBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                    Apply Now
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="space-y-4 text-sm text-gray-700">
-      <p><strong>Description:</strong> <span id="modalDescription" class="break-words">-</span></p>
-      <p><strong>Stipend:</strong> <span id="modalStipend" class="break-words">-</span></p>
-      <p><strong>Location:</strong> <span id="modalLocation" class="break-words">-</span></p>
-      <p><strong>Deadline:</strong> <span id="modalDeadline">-</span></p>
-    </div>
-    <div class="mt-6 text-right">
-      <button id="applyBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-        Apply Now
-      </button>
-    </div>
-  </div>
-</div>
-    
+
 </body>
+
 </html>

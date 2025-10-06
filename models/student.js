@@ -5,6 +5,8 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, default: 'student' },  // Role added here
+  course: { type: String, default: "" },        // ← Add this
+  achievements: { type: [String], default: [] },
   isBlocked: { type: Boolean, default: false }
 }, { timestamps: true });
 

@@ -27,6 +27,65 @@ const authorizeStudent = (req, res, next) => {
     }
 };
 
+// Get student profile
+router.get('/profile', authenticateToken, authorizeStudent, async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        const student = await Student.findById(studentId).lean(); // lean() gives plain JS object
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found.' });
+        }
+
+        res.json({
+            name: student.name,
+            email: student.email,
+            course: student.course || '',
+            achievements: student.achievements || []
+        });
+    } catch (err) {
+        console.error('Error fetching student profile:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/dashboard-stats', authenticateToken, authorizeStudent, async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        // Fetch student document
+        const student = await Student.findById(studentId).lean();
+
+        // Fetch student applications
+        const applications = await InternshipApplication.find({ student: studentId }).lean();
+
+        // Dashboard numbers
+        const totalApplications = applications.length;
+        const offersReceived = applications.filter(a => a.status === 'Offer').length;
+        const pendingInterviews = applications.filter(a => a.status === 'Interview').length;
+
+        // ✅ Calculate profile completion
+        let profileCompletion = 0;
+        if (student.name) profileCompletion += 25;
+        if (student.email) profileCompletion += 25;
+        if (student.course) profileCompletion += 25;
+        if (student.achievements && student.achievements.length > 0) profileCompletion += 25;
+
+        // Send JSON to frontend
+        res.json({
+            totalApplications,
+            offersReceived,
+            pendingInterviews,
+            profileCompletion
+        });
+
+    } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get all available internships
 router.get('/internships', authenticateToken, authorizeStudent, async (req, res) => {
     try {
@@ -174,7 +233,7 @@ router.get('/applications/:applicationId/resume', authenticateToken, authorizeSt
 // Update student profile
 router.put('/update-profile', authenticateToken, async (req, res) => {
     const studentId = req.user.id; // JWT contains the student's id
-    const { name, email, course } = req.body;
+    const { name, email, course, achievements } = req.body;
 
     if (!name || !email) {
         return res.status(400).json({ message: 'Name and email are required.' });
@@ -190,6 +249,9 @@ router.put('/update-profile', authenticateToken, async (req, res) => {
         student.name = name;
         student.email = email;
         student.course = course || student.course;
+        if (Array.isArray(achievements)) {
+            student.achievements = achievements;
+        }
 
         await student.save();
 

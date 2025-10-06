@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,25 +9,37 @@
     <script src="admin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>window.jspdf = window.jspdf || {};</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
-<body class="bg-gray-100">
+
+<body class="relative font-sans min-h-screen">
+    <div class="absolute inset-0 bg-cover bg-center filter blur-sm"
+        style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1950&q=80'); z-index: -1;">
+    </div>
+
     <div class="flex h-screen">
 
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 fixed top-0 left-0 h-screen bg-white shadow-lg flex flex-col z-20">
             <div class="h-14 flex items-center justify-between px-4 border-b">
                 <h1 class="text-lg font-bold text-indigo-600">CampusIntern</h1>
-                <button onclick="toggleSidebar()" class="md:hidden text-gray-500">✖</button>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-800">✖</button>
             </div>
             <nav class="flex-1 p-3 space-y-1">
-                <button data-section="dashboard" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Dashboard</button>
+                <button data-section="dashboard"
+                    class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Dashboard</button>
                 <button data-section="users" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Users</button>
-                <button data-section="internships" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Internships</button>
-                <button data-section="applications" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Applications</button>
-                <button data-section="reports" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Reports</button>
-                <button data-section="announcements" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Announcements</button>
-                <button data-section="settings" class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Settings</button>
+                <button data-section="internships"
+                    class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Internships</button>
+                <button data-section="applications"
+                    class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Applications</button>
+                <button data-section="reports"
+                    class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Reports</button>
+                <button data-section="announcements"
+                    class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Announcements</button>
+                <button data-section="settings"
+                    class="w-full text-left p-2 rounded-lg hover:bg-indigo-100">Settings</button>
             </nav>
         </aside>
 
@@ -53,31 +66,33 @@
             <main class="flex-1 overflow-y-auto p-6 md:p-8">
                 <!-- Dashboard section -->
                 <section id="dashboard" class="w-full">
-                    <h3 class="text-xl font-bold mb-3">Dashboard Overview</h3>
+                    <h3 class="text-xl text-white font-bold mb-3">Dashboard Overview</h3>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full">
                         <div class="bg-white p-3 rounded-2xl shadow text-center">
-                            <h4 class="text-gray-500">Students</h4>
+                            <h4 class="text-gray-800">Students</h4>
                             <p id="studentCount" class="text-xl font-bold text-indigo-600">0</p>
                         </div>
                         <div class="bg-white p-3 rounded-2xl shadow text-center">
-                            <h4 class="text-gray-500">Companies</h4>
+                            <h4 class="text-gray-800">Companies</h4>
                             <p id="companyCount" class="text-xl font-bold text-indigo-600">0</p>
                         </div>
                         <div class="bg-white p-3 rounded-2xl shadow text-center">
-                            <h4 class="text-gray-500">Internships</h4>
+                            <h4 class="text-gray-800">Internships</h4>
                             <p id="internshipCount" class="text-xl font-bold text-indigo-600">0</p>
                         </div>
                         <div class="bg-white p-3 rounded-2xl shadow text-center">
-                            <h4 class="text-gray-500">Offers</h4>
+                            <h4 class="text-gray-800">Offers</h4>
                             <p id="applicationCount" class="text-xl font-bold text-indigo-600">0</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mt-4 w-full">
-                        <div class="bg-white h-48 rounded-xl shadow flex items-center justify-center text-gray-400">
-                            Chart 1(Company wise offers)
+                        <div class="bg-white h-48 rounded-xl shadow p-4">
+                            <canvas id="companyChart"></canvas>
+                            <!-- Chart 1(Company wise offers) -->
                         </div>
-                        <div class="bg-white h-48 rounded-xl shadow flex items-center justify-center text-gray-400">
-                            Chart 2(Application Trend)
+                        <div class="bg-white h-48 rounded-xl shadow p-4">
+                            <canvas id="applicationTrendChart"></canvas>
+                            <!-- Chart 2(Application Trend) -->
                         </div>
                     </div>
                 </section>
@@ -85,7 +100,7 @@
 
                 <!--Users section-->
                 <section id="users" class="hidden">
-                    <h3 class="text-xl font-bold mb-3">Manage Users</h3>
+                    <h3 class="text-xl text-white font-bold mb-3">Manage Users</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse bg-white shadow rounded-lg">
                             <thead class="bg-indigo-50">
@@ -105,7 +120,7 @@
 
                 <!--Internship sections-->
                 <section id="internships" class="hidden">
-                    <h3 class="text-xl font-bold mb-4">Manage Internships</h3>
+                    <h3 class="text-xl text-white font-bold mb-4">Manage Internships</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse bg-white shadow rounded-lg">
                             <thead class="bg-indigo-50">
@@ -125,7 +140,7 @@
 
                 <!--Application section-->
                 <section id="applications" class="hidden">
-                    <h3 class="text-xl font-bold mb-4">Applications</h3>
+                    <h3 class="text-xl text-white font-bold mb-4">Applications</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse bg-white shadow rounded-lg">
                             <thead class="bg-indigo-50">
@@ -145,71 +160,83 @@
 
                 <!--Reports section-->
                 <section id="reports" class="hidden">
-                    <h3 class="text-xl font-bold mb-4">Reports</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white h-48 rounded-xl shadow flex items-center justify-center text-gray-400">
-                            Company wise selections(chart)
+                    <h3 class="text-xl text-white font-bold mb-4">Reports</h3>
+
+                    <!--Charts grid-->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-8">
+                        <div class="bg-white h-80 md:h-96 rounded-2xl shadow-lg p-6 flex flex-col">
+                            <h4 class="font-semibold mb-4 text-lg md:text-xl">Company wise selections</h4>
+                            <canvas id="reportsCompanyChart"></canvas>
                         </div>
-                        <div class="bg-white h-48 rounded-xl shadow flex items-center justify-center text-gray-400">
-                            Applications Trend(chart)
+
+                        <div class="bg-white h-80 md:h-96 rounded-2xl shadow-lg p-6 flex flex-col">
+                            <h4 class="font-semibold mb-4 text-lg md:text-xl">Applications Trend</h4>
+                            <canvas id="reportsApplicationChart"></canvas>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl shadow p-4">
-                    <h4 class="font-semibold mb-3">Internships</h4>
-                    <div class="flex flex-col md:flex-row space-y-2 md:space-x-4">
-                        <button class="px-4 py-2 bg-indigo-600 text-white rounded" onclick="exportCSV('internships')">Export to CSV</button>
-                        <button class="px-4 py-2 bg-green-600 text-white rounded" onclick="exportPDF('internships')">Export to PDF</button>
+                        <h4 class="font-semibold mb-3">Internships</h4>
+                        <div class="flex flex-col md:flex-row space-y-2 md:space-x-4">
+                            <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium"
+                                onclick="exportCSV('internships')">Export to CSV</button>
+                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium"
+                                onclick="exportPDF('internships')">Export to PDF</button>
+                        </div>
                     </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-4">
+                        <h4 class="font-semibold mb-3">Applications</h4>
+                        <div class="flex flex-col md:flex-row space-y-2 md:space-x-4">
+                            <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium"
+                                onclick="exportCSV('applications')">Export to CSV</button>
+                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium"
+                                onclick="exportPDF('applications')">Export to PDF</button>
+                        </div>
                     </div>
-                    
-                    <div class="bg-white rounded-xl shadow p-4">
-                    <h4 class="font-semibold mb-3">Applications</h4>
-                    <div class="flex flex-col md:flex-row space-y-2 md:space-x-4">
-                        <button class="px-4 py-2 bg-indigo-600 text-white rounded" onclick="exportCSV('applications')">Export to CSV</button>
-                        <button class="px-4 py-2 bg-green-600 text-white rounded" onclick="exportPDF('applications')">Export to PDF</button>
+
+                    <div class="bg-white rounded-xl shadow-lg p-4">
+                        <h4 class="font-semibold mb-3">Users</h4>
+                        <div class="flex flex-col md:flex-row space-y-2 md:space-x-4">
+                            <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium"
+                                onclick="exportCSV('users')">Export to CSV</button>
+                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium"
+                                onclick="exportPDF('users')">Export to PDF</button>
+                        </div>
                     </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl shadow p-4">
-                    <h4 class="font-semibold mb-3">Users</h4>
-                    <div class="flex flex-col md:flex-row space-y-2 md:space-x-4">
-                        <button class="px-4 py-2 bg-indigo-600 text-white rounded" onclick="exportCSV('users')">Export to CSV</button>
-                        <button class="px-4 py-2 bg-green-600 text-white rounded" onclick="exportPDF('users')">Export to PDF</button>
-                    </div> 
-                    </div>           
                 </section>
 
                 <!--Announcements section-->
                 <section id="announcements" class="hidden">
-                    <h3 class="text-xl font-bold mb-4">Announcements</h3>
-                    <textarea class="w-full p-3 border rounded-lg" placeholder="Write announcement...."></textarea> 
+                    <h3 class="text-xl text-white font-bold mb-4">Announcements</h3>
+                    <textarea class="w-full p-3 border rounded-lg" placeholder="Write announcement...."></textarea>
                     <button class="mt-3 px-4 py-2 bg-indigo-600 text-white rounded">Send</button>
-                    <h4 class="text-lg font-semibold mt-6">Previous Announcements</h4> 
+                    <h4 class="text-lg text-white font-semibold mt-6">Previous Announcements</h4>
                     <ul id="announcementsList" class="mt-2 space-y-2">
                         <!-- <li class="bg-white p-3 rounded shadow">Internship Fair scheduled for 1st Sept 2025</li>
                         <li class="bg-white p-3 rounded shadow">Resume upload deadline extended till 25th Aug</li> -->
-                    </ul>                  
+                    </ul>
                 </section>
 
                 <!--Settings section-->
                 <section id="settings" class="hidden">
-                    <h3 class="text-xl font-bold mb-4">Settings</h3>
-                    <p class="mb-4 text-gray-600">Manage admin and session info</p>
+                    <h3 class="text-xl text-white font-bold mb-4">Settings</h3>
+                    <p class="mb-4 text-white">Manage admin and session info</p>
                     <form id="addAdminForm" class="bg-white p-4 rounded shadow max-w-md">
 
                         <!--Name input-->
                         <label class="block mb-2 font-medium">Name</label>
                         <input id="newAdminName" type="text" placeholder="Admin name" class="w-full p-2 border mb-3">
-        
+
                         <!-- Email input -->
                         <label class="block mb-2 font-medium">Email</label>
                         <input id="newAdminEmail" type="email" placeholder="Admin email" class="w-full p-2 border mb-3">
-                        
+
                         <!-- Password input -->
                         <label class="block mb-2 font-medium">Password</label>
-                        <input id="newAdminPassword" type="password" placeholder="Choose a password" class="w-full p-2 border mb-3">
-                        
+                        <input id="newAdminPassword" type="password" placeholder="Choose a password"
+                            class="w-full p-2 border mb-3">
+
                         <!-- Submit button -->
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Add admin</button>
                         <p id="addAdminMessage" class="mt-2 text-sm"></p>
@@ -218,10 +245,11 @@
             </main>
         </div>
 
-       <!-- Internship Modal -->
+        <!-- Internship Modal -->
         <div id="internshipModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
             <div class="bg-white rounded shadow-lg max-w-lg w-full p-4 relative">
-                <button id="internshipModalClose" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">&times;</button>
+                <button id="internshipModalClose"
+                    class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">&times;</button>
                 <h2 class="text-xl font-semibold mb-4" id="modalTitle">Internship Title</h2>
                 <div id="modalContent" class="space-y-2 text-gray-700">
                     <!-- Internship details rendered here dynamically -->
@@ -232,7 +260,8 @@
         <!-- Application Details Modal -->
         <div id="appModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-[9999]">
             <div class="bg-white rounded shadow-lg max-w-md w-full p-6 relative border-8">
-                <button id="appModalClose" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">&times;</button>
+                <button id="appModalClose"
+                    class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">&times;</button>
                 <h2 class="text-xl font-semibold mb-4">Application Details</h2>
                 <p><strong>Student Name:</strong> <span id="modalStudentName">N/A</span></p>
                 <p><strong>Internship:</strong> <span id="modalInternship">N/A</span></p>
@@ -257,4 +286,5 @@
         </div>
     </div>
 </body>
+
 </html>
