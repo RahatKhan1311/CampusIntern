@@ -74,7 +74,7 @@ async function loadUsers() {
             currentUsersData = users; 
             renderUsersTable(users);
         } else {
-            console.error('Failed to load users: ', users.message);
+            console.error('Failed to load users:', users.message);
         }
     } catch (err) {
         console.error('Error fetching users:', err);

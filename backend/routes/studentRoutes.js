@@ -1,33 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('./middleware/auth');
+const authenticateToken = require('../middleware/auth');
 const Internship = require('../../models/internship');
 const InternshipApplication = require('../../models/internshipApplication');
 const Student = require('../../models/student');
 const path = require('path');
 const multer = require('multer');
-// const internship = require('../../models/internship');
 
+// Setup for multer disk storage
 const storage = multer.diskStorage({
-    destination: (req,file,cb) =>{
+    destination: (req, file, cb) => {
         cb(null, path.join(__dirname, '..', '..', 'uploads', 'resumes'));
     },
-    filename: (req,file,cb) =>{
+    filename: (req, file, cb) => {
         cb(null, req.user.id + '-' + Date.now() + path.extname(file.originalname));
     }
 });
-const upload = multer({storage: storage});
+const upload = multer({ storage: storage });
 
 // Middleware to ensure the user is a student
 const authorizeStudent = (req, res, next) => {
-    if (req.user && req.user.role === 'student') {
-        next();
-    } else {
-        res.status(403).json({ message: 'Access denied. Student privileges required.' });
-    }
+    if (req.user && req.user.role === 'student') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Access denied. Student privileges required.' });
+    }
 };
 
-// Get student profile
+// Get student profile (RIGOROUSLY CLEANED PATH)
 router.get('/profile', authenticateToken, authorizeStudent, async (req, res) => {
     try {
         const studentId = req.user.id;
@@ -50,6 +50,7 @@ router.get('/profile', authenticateToken, authorizeStudent, async (req, res) => 
     }
 });
 
+// Get student dashboard stats (RIGOROUSLY CLEANED PATH)
 router.get('/dashboard-stats', authenticateToken, authorizeStudent, async (req, res) => {
     try {
         const studentId = req.user.id;
@@ -62,10 +63,10 @@ router.get('/dashboard-stats', authenticateToken, authorizeStudent, async (req, 
 
         // Dashboard numbers
         const totalApplications = applications.length;
-        const offersReceived = applications.filter(a => a.status === 'Offer').length;
-        const pendingInterviews = applications.filter(a => a.status === 'Interview').length;
+        const offersReceived = applications.filter(a => a.status === 'Selected').length;
+        const pendingInterviews = applications.filter(a => a.status === 'Shortlisted').length; 
 
-        // ✅ Calculate profile completion
+        // Calculate profile completion
         let profileCompletion = 0;
         if (student.name) profileCompletion += 25;
         if (student.email) profileCompletion += 25;
@@ -86,18 +87,19 @@ router.get('/dashboard-stats', authenticateToken, authorizeStudent, async (req, 
     }
 });
 
-// Get all available internships
+// Get all available internships (RIGOROUSLY CLEANED PATH)
 router.get('/internships', authenticateToken, authorizeStudent, async (req, res) => {
-    try {
-        const internships = await Internship.find({}).populate('company', 'name');
-        res.json(internships);
-    } catch (err) {
-        console.error('Error fetching all internships:', err);
-        res.status(500).json({ message: 'Server error' });
-    }
+    try {
+        // Students should only see 'Approved' internships
+        const internships = await Internship.find({ status: 'Approved' }).populate('company', 'name');
+        res.json(internships);
+    } catch (err) {
+        console.error('Error fetching all internships:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
-// Apply for an internship
+// Apply for an internship (RIGOROUSLY CLEANED PATH: /internships/:internshipId/apply)
 router.post('/internships/:internshipId/apply', authenticateToken, authorizeStudent, async (req, res) => {
     try {
         const { internshipId } = req.params;
@@ -112,6 +114,12 @@ router.post('/internships/:internshipId/apply', authenticateToken, authorizeStud
         if (!internshipDoc.company) {
             return res.status(400).json({ message: 'Cannot apply: internship has no company assigned.' });
         }
+        
+        // Ensure the internship is Approved before allowing application
+        if (internshipDoc.status !== 'Approved') {
+            return res.status(400).json({ message: 'Cannot apply: This internship is not currently open for applications.' });
+        }
+
 
         // Check if student has already applied
         const existingApplication = await InternshipApplication.findOne({ student: studentId, internship: internshipId });
@@ -123,7 +131,7 @@ router.post('/internships/:internshipId/apply', authenticateToken, authorizeStud
             student: studentId,
             internship: internshipId,
             company: internshipDoc.company,
-            status: 'Applied'
+            status: 'Pending' // Initial status should be Pending or Applied
         });
 
         await newApplication.save();
@@ -134,59 +142,64 @@ router.post('/internships/:internshipId/apply', authenticateToken, authorizeStud
     }
 });
 
-// GET /applications - fetch student's applications with internship and company populated
+// GET /applications - fetch student's applications with internship and company populated (RIGOROUSLY CLEANED PATH)
 router.get('/applications', authenticateToken, authorizeStudent, async (req, res) => {
-  try {
-    const studentId = req.user.id;
+    try {
+        const studentId = req.user.id;
 
-    const applications = await InternshipApplication.find({ student: studentId })
-      .populate({
-        path: 'internship',
-        select: 'title company',
-        populate: { path: 'company', select: 'name' }
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+        const applications = await InternshipApplication.find({ student: studentId })
+            .populate({
+                path: 'internship',
+                select: 'title company',
+                populate: { path: 'company', select: 'name' }
+            })
+            .sort({ createdAt: -1 })
+            .lean();
 
-    // Format data to send minimal needed info
-    const formatted = applications.map(app => ({
-      _id: app._id,
-      internshipTitle: app.internship?.title || 'N/A',
-      companyName: app.internship?.company?.name || 'N/A',
-      status: app.status,
-      appliedOn: app.createdAt,
-      companyNotes: app.companyNotes || 'No notes',
-      resumePath: app.resumePath || '',
-    }));
+        // Format data to send minimal needed info
+        const formatted = applications.map(app => ({
+            _id: app._id,
+            internshipTitle: app.internship?.title || 'N/A',
+            companyName: app.internship?.company?.name || 'N/A',
+            status: app.status,
+            appliedOn: app.createdAt,
+            companyNotes: app.companyNotes || 'No notes',
+            resumePath: app.resumePath || '',
+        }));
 
-    // console.log(formatted);
-    res.json(formatted);
-  } catch (err) {
-    console.error('Error fetching student applications:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
+        res.json(formatted);
+    } catch (err) {
+        console.error('Error fetching student applications:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 
-// Delete an application
+// Delete an application (RIGOROUSLY CLEANED PATH: /applications/:applicationId)
 router.delete('/applications/:applicationId', authenticateToken, authorizeStudent, async (req, res) => {
-    try {
-        const { applicationId } = req.params;
-        const studentId = req.user.id;
+    try {
+        const { applicationId } = req.params;
+        const studentId = req.user.id;
 
-        const application = await InternshipApplication.findOne({ _id: applicationId, student: studentId });
-        if (!application) {
-            return res.status(404).json({ message: 'Application not found or you do not have permission to delete it.' });
-        }
+        const application = await InternshipApplication.findOne({ _id: applicationId, student: studentId });
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found or you do not have permission to delete it.' });
+        }
+        
+        // Prevent deletion if application is already processed (Shortlisted or Selected)
+        if (['Shortlisted', 'Selected'].includes(application.status)) {
+            return res.status(403).json({ message: 'Cannot delete application once it has been processed by the company.' });
+        }
 
-        await application.deleteOne();
-        res.json({ message: 'Application deleted successfully.' });
-    } catch (err) {
-        console.error('Error deleting application:', err);
-        res.status(500).json({ message: 'Server error' });
-    }
+        await application.deleteOne();
+        res.json({ message: 'Application deleted successfully.' });
+    } catch (err) {
+        console.error('Error deleting application:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
+// Upload resume (RIGOROUSLY CLEANED PATH: /applications/:applicationId/resume)
 router.post('/applications/:applicationId/resume', authenticateToken, authorizeStudent, upload.single('resume'), async (req, res) => {
     try {
         const { applicationId } = req.params;
@@ -211,6 +224,7 @@ router.post('/applications/:applicationId/resume', authenticateToken, authorizeS
     }
 });
 
+// Download resume (RIGOROUSLY CLEANED PATH: /applications/:applicationId/resume)
 router.get('/applications/:applicationId/resume', authenticateToken, authorizeStudent, async (req, res) => {
     try {
         const { applicationId } = req.params;
@@ -230,7 +244,7 @@ router.get('/applications/:applicationId/resume', authenticateToken, authorizeSt
     }
 });
 
-// Update student profile
+// Update student profile (RIGOROUSLY CLEANED PATH)
 router.put('/update-profile', authenticateToken, async (req, res) => {
     const studentId = req.user.id; // JWT contains the student's id
     const { name, email, course, achievements } = req.body;
